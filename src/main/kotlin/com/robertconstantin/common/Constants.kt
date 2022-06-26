@@ -1,4 +1,4 @@
-package com.robertconstantin
+package com.robertconstantin.common
 
 object Constants {
     //Database

@@ -8,7 +8,12 @@ class UserRepositoryImpl(private val database: CoroutineDatabase): UserRepositor
     //Define collections to be userd
     private val userCollection = database.getCollection<User>()
 
+
     override suspend fun getUserByEmail(email: String): User? {
         return userCollection.findOne(User::email eq email)
+    }
+
+    override suspend fun createUser(user: User) {
+        userCollection.insertOne(user)
     }
 }

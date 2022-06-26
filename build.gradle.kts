@@ -22,6 +22,7 @@ repositories {
     mavenCentral()
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap") }
 }
+val sshAntTask = configurations.create("sshAntTask")
 
 dependencies {
     implementation("io.ktor:ktor-server-core:$ktor_version")
@@ -55,4 +56,6 @@ dependencies {
 
     //Gson only used for test implementation so that we use that function.
     testImplementation("com.google.code.gson:gson:2.9.0")
+
+    sshAntTask("org.apache.ant:ant-jsch:1.10.12")
 }
