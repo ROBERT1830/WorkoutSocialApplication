@@ -32,7 +32,7 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
             User(
                 name = request.name,
                 email = request.email,
-                password = request.password,
+                password = saltedHash.hash,
                 profileImageUrl = DEFAULT_PROFILE_PICTURE_PATH,
                 salt = saltedHash.salt
             )
