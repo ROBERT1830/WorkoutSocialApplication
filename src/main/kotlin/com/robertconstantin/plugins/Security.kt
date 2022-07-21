@@ -30,5 +30,9 @@ fun Application.configureSecurity(tokenConfig: TokenConfig) {
             }
         }
     }
-
 }
+
+//from an authenticated user get the userId.
+
+val JWTPrincipal.userId: String?
+    get() = getClaim("userId", String::class)

@@ -8,7 +8,6 @@ data class User(
     val email: String,
     val password: String,
     val profileImageUrl: String,
-    val participants: Long = 0,
     val postCount: Long = 0,
     val salt: String,
     @BsonId

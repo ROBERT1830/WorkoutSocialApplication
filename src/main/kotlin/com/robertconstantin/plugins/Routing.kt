@@ -1,12 +1,10 @@
 package com.robertconstantin.plugins
 
-import com.robertconstantin.routes.authenticate
-import com.robertconstantin.routes.createUser
-import com.robertconstantin.routes.getSecretInfo
-import com.robertconstantin.routes.signIn
+import com.robertconstantin.routes.*
 import com.robertconstantin.security.hashing.HashingService
 import com.robertconstantin.security.token.TokenConfig
 import com.robertconstantin.security.token.TokenService
+import com.robertconstantin.service.post_service.PostService
 import com.robertconstantin.service.user_service.UserService
 import io.ktor.application.*
 import io.ktor.http.content.*
@@ -19,6 +17,7 @@ fun Application.configureRouting(tokenConfig: TokenConfig) {
     val userService: UserService by inject()
     val hashingService: HashingService by inject()
     val tokenService: TokenService by inject()
+    val postService: PostService by inject()
 
     routing {
         //Create user
@@ -26,9 +25,10 @@ fun Application.configureRouting(tokenConfig: TokenConfig) {
         signIn(userService, hashingService,tokenService, tokenConfig )
         authenticate()
         getSecretInfo()
+        createPost(postService)
 
-        // Static plugin. Try to access `/static/index.html`
-        static("/static") {
+        // Access static resources
+        static {
             resources("static")
         }
     }
