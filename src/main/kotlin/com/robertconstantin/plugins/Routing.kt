@@ -26,6 +26,7 @@ fun Application.configureRouting(tokenConfig: TokenConfig) {
         authenticate()
         getSecretInfo()
         createPost(postService)
+        getAllPosts(postService)
 
         // Access static resources
         static {

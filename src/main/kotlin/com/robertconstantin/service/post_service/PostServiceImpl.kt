@@ -3,6 +3,7 @@ package com.robertconstantin.service.post_service
 import com.robertconstantin.data.Post
 import com.robertconstantin.repository.post.PostRepository
 import com.robertconstantin.request.CreatePostRequest
+import com.robertconstantin.responses.PostResponse
 
 class PostServiceImpl(
     private val repository: PostRepository
@@ -19,5 +20,9 @@ class PostServiceImpl(
                 timestamp = System.currentTimeMillis()
             )
         )
+    }
+
+    override suspend fun getAllPosts(ownUserId: String, page: Int, pageSize: Int): List<PostResponse> {
+        return repository.getAllPosts(ownUserId, page, pageSize)
     }
 }
