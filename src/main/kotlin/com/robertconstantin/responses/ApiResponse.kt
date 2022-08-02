@@ -1,6 +1,6 @@
 package com.robertconstantin.responses
 
-data class BasicApiResponse<T>(
+data class ApiResponse<T>(
     val successful: Boolean,
     //message for error. Could be nullable
     val message: String? = null,

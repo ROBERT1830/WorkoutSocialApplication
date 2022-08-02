@@ -13,7 +13,6 @@ class UserRepositoryImpl(private val database: CoroutineDatabase): UserRepositor
         return userCollection.findOne(User::email eq email)
     }
 
-    override suspend fun createUser(user: User) {
-        userCollection.insertOne(user)
-    }
+    override suspend fun createUser(user: User) =  userCollection.insertOne(user).wasAcknowledged()
+
 }

@@ -10,5 +10,6 @@ data class PostResponse(
     val location: String,
     val subscriptionsCount: Long = 0,
     val likeCount: Long = 0,
-    val isAddedToFavorites : Boolean
+    val isAddedToFavorites : Boolean,
+    val isUserSubscribed: Boolean
 )

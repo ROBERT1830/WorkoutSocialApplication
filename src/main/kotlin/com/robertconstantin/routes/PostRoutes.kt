@@ -7,7 +7,8 @@ import com.robertconstantin.common.Constants.PARAM_PAGE
 import com.robertconstantin.common.Constants.PARAM_PAGE_SIZE
 import com.robertconstantin.common.Constants.POST_PICTURE_PATH
 import com.robertconstantin.request.CreatePostRequest
-import com.robertconstantin.responses.BasicApiResponse
+import com.robertconstantin.responses.ApiResponse
+import com.robertconstantin.responses.PostResponse
 import com.robertconstantin.routes.util.RoutesEndpoints.CREATE_POST_ENDPOINT
 import com.robertconstantin.routes.util.RoutesEndpoints.GET_ALL_POSTS
 import com.robertconstantin.routes.util.save
@@ -25,7 +26,7 @@ import java.io.File
 
 fun Route.createPost(
     postService: PostService
-){
+) {
     val gson by inject<Gson>()
 
     authenticate {
@@ -36,7 +37,7 @@ fun Route.createPost(
             var imageFileName: String? = null
             //get post data and image
             multipart.forEachPart { partData ->
-                when(partData) {
+                when (partData) {
                     is PartData.FormItem -> {
                         if (partData.name == "post_data") {
                             createPostRequest = gson.fromJson(
@@ -51,7 +52,7 @@ fun Route.createPost(
                     is PartData.BinaryItem -> Unit
                 }
             }
-            createPostRequest?.let { request->
+            createPostRequest?.let { request ->
                 postService.createPost(
                     userId = call.userId,
                     request = request,
@@ -61,9 +62,9 @@ fun Route.createPost(
                     if (postWasCreated) {
                         call.respond(
                             status = HttpStatusCode.OK,
-                            message = BasicApiResponse<Unit>(successful = true)
+                            message = ApiResponse<Unit>(successful = true)
                         )
-                    }else {
+                    } else {
                         //delete the file we created and respond with internalServerError
                         File("${POST_PICTURE_PATH}/$imageFileName").delete()
                         call.respond(HttpStatusCode.InternalServerError)
@@ -79,7 +80,7 @@ fun Route.createPost(
 
 fun Route.getAllPosts(
     postService: PostService
-){
+) {
     authenticate {
         get(GET_ALL_POSTS) {
             val page = call.parameters[PARAM_PAGE]?.toIntOrNull() ?: 0
@@ -88,6 +89,7 @@ fun Route.getAllPosts(
                 status = HttpStatusCode.OK,
                 postService.getAllPosts(call.userId, page, pageSize)
             )
+
         }
     }
 }

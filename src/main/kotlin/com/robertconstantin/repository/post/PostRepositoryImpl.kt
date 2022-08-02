@@ -2,6 +2,7 @@ package com.robertconstantin.repository.post
 
 import com.robertconstantin.data.Favorites
 import com.robertconstantin.data.Post
+import com.robertconstantin.data.Subscription
 import com.robertconstantin.data.User
 import com.robertconstantin.responses.PostResponse
 import org.litote.kmongo.and
@@ -16,6 +17,7 @@ class PostRepositoryImpl(
     private val postCollection = db.getCollection<Post>()
     private val userCollection = db.getCollection<User>()
     private val favoritesCollection = db.getCollection<Favorites>()
+    private val subscriptionCollection = db.getCollection<Subscription>()
 
     override suspend fun createPost(post: Post): Boolean {
         //insert a post collection and then increment post count from user collection by one.
@@ -36,7 +38,6 @@ class PostRepositoryImpl(
             .descendingSort(Post::timestamp)
             .toList()
             .map { dbPost ->
-
                 val dbPostUser = userCollection.findOneById(dbPost.userId)
                 PostResponse(
                     postId = dbPost.id,
@@ -53,6 +54,12 @@ class PostRepositoryImpl(
                         and(
                             Favorites::postId eq dbPost.id,
                             Favorites::userId eq currentUserId
+                        )
+                    ) != null,
+                    isUserSubscribed = subscriptionCollection.findOne(
+                        and(
+                            Subscription::postId  eq dbPost.id,
+                            Subscription::userId eq currentUserId
                         )
                     ) != null
                 )
