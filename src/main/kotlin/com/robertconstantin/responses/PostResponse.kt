@@ -5,11 +5,12 @@ data class PostResponse(
     val userId: String,
     val userName: String,
     val imageUrl: String,
+    val profileImage: String,
     val sportType: String,
     val description: String,
     val location: String,
     val subscriptionsCount: Long = 0,
     val likeCount: Long = 0,
-    val isAddedToFavorites : Boolean,
-    val isUserSubscribed: Boolean
+    val isAddedToFavorites : Boolean?,
+    val isUserSubscribed: Boolean?
 )

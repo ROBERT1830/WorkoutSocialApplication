@@ -3,13 +3,10 @@ package com.robertconstantin.routes
 import com.google.gson.Gson
 import com.robertconstantin.common.ApiResponseMessages.FIELDS_BLANK
 import com.robertconstantin.common.ApiResponseMessages.INVALID_CREDENTIALS
-import com.robertconstantin.common.ApiResponseMessages.USER_ALREADY_EXISTS
-import com.robertconstantin.common.Constants
 import com.robertconstantin.common.Constants.BASE_URL
 import com.robertconstantin.common.Constants.PROFILE_PICTURE_PATH
 import com.robertconstantin.common.ValidationRequest
 import com.robertconstantin.request.CreateAccountRequest
-import com.robertconstantin.request.CreatePostRequest
 import com.robertconstantin.request.LoginRequest
 import com.robertconstantin.responses.AuthResponse
 import com.robertconstantin.responses.ApiResponse
@@ -62,7 +59,7 @@ fun Route.createUser(
                         }
                     }
                     is PartData.FileItem -> {
-                        profileImageFileName = partData.save(Constants.POST_PICTURE_PATH)
+                        profileImageFileName = partData.save(PROFILE_PICTURE_PATH)
                     }
                     is PartData.BinaryItem -> Unit
                 }

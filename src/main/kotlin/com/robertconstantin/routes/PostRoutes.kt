@@ -8,8 +8,8 @@ import com.robertconstantin.common.Constants.PARAM_PAGE_SIZE
 import com.robertconstantin.common.Constants.POST_PICTURE_PATH
 import com.robertconstantin.request.CreatePostRequest
 import com.robertconstantin.responses.ApiResponse
-import com.robertconstantin.responses.PostResponse
 import com.robertconstantin.routes.util.RoutesEndpoints.CREATE_POST_ENDPOINT
+import com.robertconstantin.routes.util.RoutesEndpoints.GET_ALL_CURRENT_USER_POSTS
 import com.robertconstantin.routes.util.RoutesEndpoints.GET_ALL_POSTS
 import com.robertconstantin.routes.util.save
 import com.robertconstantin.routes.util.userId
@@ -88,6 +88,22 @@ fun Route.getAllPosts(
             call.respond(
                 status = HttpStatusCode.OK,
                 postService.getAllPosts(call.userId, page, pageSize)
+            )
+
+        }
+    }
+}
+
+fun Route.getAllCurrentUserPosts(
+    postService: PostService
+) {
+    authenticate {
+        get(GET_ALL_CURRENT_USER_POSTS) {
+            val page = call.parameters[PARAM_PAGE]?.toIntOrNull() ?: 0
+            val pageSize = call.parameters[PARAM_PAGE_SIZE]?.toIntOrNull() ?: DEFAULT_PAGE_SIZE
+            call.respond(
+                status = HttpStatusCode.OK,
+                postService.getAllCurrentUserPosts(call.userId, page, pageSize)
             )
 
         }
