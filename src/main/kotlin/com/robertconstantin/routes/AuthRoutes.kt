@@ -1,15 +1,18 @@
 package com.robertconstantin.routes
 
+import com.google.gson.Gson
 import com.robertconstantin.common.ApiResponseMessages.FIELDS_BLANK
 import com.robertconstantin.common.ApiResponseMessages.INVALID_CREDENTIALS
-import com.robertconstantin.common.ApiResponseMessages.USER_ALREADY_EXISTS
+import com.robertconstantin.common.Constants.BASE_URL
+import com.robertconstantin.common.Constants.PROFILE_PICTURE_PATH
 import com.robertconstantin.common.ValidationRequest
 import com.robertconstantin.request.CreateAccountRequest
 import com.robertconstantin.request.LoginRequest
 import com.robertconstantin.responses.AuthResponse
-import com.robertconstantin.responses.BasicApiResponse
+import com.robertconstantin.responses.ApiResponse
 import com.robertconstantin.routes.util.RoutesEndpoints.CREATE_USER_ENDPOINT
 import com.robertconstantin.routes.util.RoutesEndpoints.SIGN_IN_USER_ENDPOINT
+import com.robertconstantin.routes.util.save
 import com.robertconstantin.security.hashing.HashingService
 import com.robertconstantin.security.hashing.SaltedHash
 import com.robertconstantin.security.token.TokenClaim
@@ -20,53 +23,100 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.koin.ktor.ext.inject
+import java.io.File
 
 // TODO: 26/6/22 inject with koin
 fun Route.createUser(
     hashingService: HashingService,
     userService: UserService
 ) {
+    val gson by inject<Gson>()
 
     route(CREATE_USER_ENDPOINT) {
         post {
-            val request = call.receiveOrNull<CreateAccountRequest>() ?: kotlin.run {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
-            //Validate empty request variables
-            when (userService.validateSignUpRequest(request)) {
-                is ValidationRequest.Success -> {
-                    if (userService.checkIfUserEmailExists(request.email)) {
-                        call.respond(
-                            message = BasicApiResponse<Unit>(
-                                message = USER_ALREADY_EXISTS,
-                                successful = false
+//            val request = call.receiveOrNull<CreateAccountRequest>() ?: kotlin.run {
+//                call.respond(HttpStatusCode.BadRequest)
+//                return@post
+//            }
+
+            val multipart = call.receiveMultipart()
+            var profileRequest: CreateAccountRequest? = null
+            var profileImageFileName: String? = null
+
+            multipart.forEachPart { partData ->
+                when (partData) {
+                    is PartData.FormItem -> {
+                        if (partData.name == "profile_data") {
+                            profileRequest = gson.fromJson(
+                                partData.value,
+                                CreateAccountRequest::class.java
                             )
-                        )
-                        return@post
+                        }
                     }
-                    val saltedHash = hashingService.generatedSaltedHash(request.password)
-                    //Create user in database
-                    userService.createUser(request, saltedHash)
+                    is PartData.FileItem -> {
+                        profileImageFileName = partData.save(PROFILE_PICTURE_PATH)
+                    }
+                    is PartData.BinaryItem -> Unit
+                }
+            }
+
+            profileRequest?.let { request ->
+                val saltedHash = hashingService.generatedSaltedHash(request.password)
+                //Create user in database
+                userService.createUser(profileImageUrl = "${BASE_URL}profile_pictures/$profileImageFileName" ,request = request, saltedHash = saltedHash)
+            }.also { userWasCreated ->
+                if (userWasCreated == true) {
                     call.respond(
-                        message = BasicApiResponse<Unit>(
+                        message = ApiResponse<Unit>(
                             successful = true
                         )
                     )
-
-                }
-                is ValidationRequest.FieldEmpty -> {
+                }else {
+                    File("${PROFILE_PICTURE_PATH}/$profileImageFileName").delete()
                     call.respond(
-                        message = BasicApiResponse<Unit>(
+                        message = ApiResponse<Unit>(
                             successful = false,
                             message = FIELDS_BLANK
                         )
                     )
                 }
+            } ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
             }
+
+            //Validate empty request variables
+//            when (userService.validateSignUpRequest(request)) {
+//                is ValidationRequest.Success -> {
+//                    if (userService.checkIfUserEmailExists(request.email)) {
+//                        call.respond(
+//                            message = ApiResponse<Unit>(
+//                                message = USER_ALREADY_EXISTS,
+//                                successful = false
+//                            )
+//                        )
+//                        return@post
+//                    }
+//                    val saltedHash = hashingService.generatedSaltedHash(request.password)
+//                    //Create user in database
+//                    userService.createUser(request, saltedHash)
+//
+//
+//                }
+//                is ValidationRequest.FieldEmpty -> {
+//                    call.respond(
+//                        message = ApiResponse<Unit>(
+//                            successful = false,
+//                            message = FIELDS_BLANK
+//                        )
+//                    )
+//                }
+//            }
         }
     }
 }
@@ -100,7 +150,7 @@ fun Route.signIn(
                         ).let { isValidPassword ->
                             if (!isValidPassword) {
                                 call.respond(
-                                    message = BasicApiResponse<Unit>(
+                                    message = ApiResponse<Unit>(
                                         successful = false,
                                         message = INVALID_CREDENTIALS
                                     )
@@ -131,7 +181,7 @@ fun Route.signIn(
                     } ?: kotlin.run {
                         //means we didnt find the user in the db because the user introduced wrong the fields
                         call.respond(
-                            message = BasicApiResponse<Unit>(
+                            message = ApiResponse<Unit>(
                                 successful = false,
                                 message = INVALID_CREDENTIALS
                             )
@@ -142,7 +192,7 @@ fun Route.signIn(
 
                 is ValidationRequest.FieldEmpty -> {
                     call.respond(
-                        message = BasicApiResponse<Unit>(
+                        message = ApiResponse<Unit>(
                             successful = false,
                             message = FIELDS_BLANK
                         )
@@ -180,7 +230,7 @@ fun Route.authenticate() {
     authenticate {
         get("/api/user/authenticate") {
             call.respond(
-                message = BasicApiResponse<Unit>(
+                message = ApiResponse<Unit>(
                     successful = true
                 )
             )

@@ -10,7 +10,7 @@ interface UserService {
     fun validateSignUpRequest(signUpRequest: CreateAccountRequest): ValidationRequest
     fun validateLoginRequest(loginRequest: LoginRequest): ValidationRequest
     suspend fun checkIfUserEmailExists(email: String): Boolean
-    suspend fun createUser(request: CreateAccountRequest, saltedHash: SaltedHash)
+    suspend fun createUser(profileImageUrl: String, request: CreateAccountRequest, saltedHash: SaltedHash): Boolean
     suspend fun getUserByEmail(email: String): User?
 
 }

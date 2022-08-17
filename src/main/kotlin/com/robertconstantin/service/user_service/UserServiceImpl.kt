@@ -27,17 +27,17 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
         userRepository.getUserByEmail(email) != null
 
     //Crate a user in db
-    override suspend fun createUser(request: CreateAccountRequest, saltedHash: SaltedHash) {
+    override suspend fun createUser(profileImage: String ,request: CreateAccountRequest, saltedHash: SaltedHash) =
         userRepository.createUser(
             User(
+                profileImageUrl = profileImage,
                 name = request.name,
                 email = request.email,
                 password = saltedHash.hash,
-                profileImageUrl = DEFAULT_PROFILE_PICTURE_PATH,
                 salt = saltedHash.salt
             )
         )
-    }
+
 
     override suspend fun getUserByEmail(email: String): User? =
         userRepository.getUserByEmail(email)
