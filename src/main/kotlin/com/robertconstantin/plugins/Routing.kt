@@ -5,6 +5,7 @@ import com.robertconstantin.security.hashing.HashingService
 import com.robertconstantin.security.token.TokenConfig
 import com.robertconstantin.security.token.TokenService
 import com.robertconstantin.service.post_service.PostService
+import com.robertconstantin.service.subscription_service.SubscriptionService
 import com.robertconstantin.service.user_service.UserService
 import io.ktor.application.*
 import io.ktor.http.content.*
@@ -18,16 +19,22 @@ fun Application.configureRouting(tokenConfig: TokenConfig) {
     val hashingService: HashingService by inject()
     val tokenService: TokenService by inject()
     val postService: PostService by inject()
+    val subscriptionService: SubscriptionService by inject()
 
     routing {
-        //Create user
+        //User
         createUser(hashingService, userService)
         signIn(userService, hashingService,tokenService, tokenConfig )
         authenticate()
         getSecretInfo()
+        //Post
         createPost(postService)
         getAllPosts(postService)
         getAllCurrentUserPosts(postService)
+        //Subscription
+        subscribe(subscriptionService)
+        unsubscribe(subscriptionService)
+
 
         // Access static resources
         static {
