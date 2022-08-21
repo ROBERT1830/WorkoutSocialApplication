@@ -29,4 +29,8 @@ class PostServiceImpl(
     override suspend fun getAllCurrentUserPosts(ownUserId: String, page: Int, pageSize: Int): List<PostResponse> {
         return repository.getAllCurrentUserPosts(ownUserId, page, pageSize)
     }
+
+    override suspend fun getPostById(currentUserId: String, postId: String): PostResponse? {
+        return repository.getPostById(currentUserId, postId)
+    }
 }

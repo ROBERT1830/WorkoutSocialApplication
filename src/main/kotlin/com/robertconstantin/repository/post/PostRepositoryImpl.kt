@@ -97,4 +97,26 @@ class PostRepositoryImpl(
                 )
             }
     }
+
+    override suspend fun getPostById(currentUserId: String, postId: String): PostResponse? {
+        val post = postCollection.findOneById(postId) ?: return null
+        val user = userCollection.findOneById(post.userId) ?: return null
+        return PostResponse(
+            postId = postId,
+            userId = user.id,
+            userName = user.name,
+            imageUrl = post.imageUrl,
+            profileImage = user.profileImageUrl,
+            description = post.description,
+            sportType = post.sportType,
+            location = post.location,
+            subscriptionsCount = post.subscriptionsCount,
+            isUserSubscribed = subscriptionCollection.findOne(
+                and(Subscription::postId eq postId, Subscription::userId eq currentUserId)) != null,
+            isAddedToFavorites = favoritesCollection.findOne(
+                and(Favorites::postId eq post.id, Favorites::userId eq currentUserId)
+            ) != null,
+
+        )
+    }
 }

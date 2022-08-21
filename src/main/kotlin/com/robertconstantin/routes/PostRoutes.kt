@@ -109,3 +109,24 @@ fun Route.getAllCurrentUserPosts(
         }
     }
 }
+
+fun Route.getPostById(postService: PostService) {
+    get("/api/post/details") {
+        val postId = call.parameters["postId"] ?: kotlin.run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@get
+        }
+        println("--------> $postId")
+        val post = postService.getPostById(call.userId, postId) ?: kotlin.run {
+            call.respond(HttpStatusCode.NotFound)
+            return@get
+        }
+        call.respond(
+            HttpStatusCode.OK,
+            ApiResponse(
+                successful = true,
+                data = post
+            )
+        )
+    }
+}

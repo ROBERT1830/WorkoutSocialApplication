@@ -25,6 +25,8 @@ fun Application.configureRouting(tokenConfig: TokenConfig) {
         //User
         createUser(hashingService, userService)
         signIn(userService, hashingService,tokenService, tokenConfig )
+        getUserCredentials(userService)
+        updateUserCretentials(userService)
         authenticate()
         getSecretInfo()
         //Post
@@ -34,6 +36,8 @@ fun Application.configureRouting(tokenConfig: TokenConfig) {
         //Subscription
         subscribe(subscriptionService)
         unsubscribe(subscriptionService)
+        getPostById(postService)
+
 
 
         // Access static resources

@@ -8,4 +8,5 @@ interface PostRepository {
     suspend fun createPost(post: Post): Boolean
     suspend fun getAllPosts(currentUserId: String, page: Int = 0, pageSize: Int = DEFAULT_PAGE_SIZE): List<PostResponse>
     suspend fun getAllCurrentUserPosts(currentUserId: String, page: Int = 0, pageSize: Int = DEFAULT_PAGE_SIZE): List<PostResponse>
+    suspend fun getPostById(currentUserId: String, postId: String): PostResponse?
 }
