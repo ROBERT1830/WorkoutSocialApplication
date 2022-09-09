@@ -3,16 +3,19 @@ package com.robertconstantin.routes
 import com.google.gson.Gson
 import com.robertconstantin.common.ApiResponseMessages.FIELDS_BLANK
 import com.robertconstantin.common.ApiResponseMessages.INVALID_CREDENTIALS
+import com.robertconstantin.common.ApiResponseMessages.USER_CREDENTIALS_NO_UPDATE
 import com.robertconstantin.common.Constants.BASE_URL
 import com.robertconstantin.common.Constants.PROFILE_PICTURE_PATH
 import com.robertconstantin.common.ValidationRequest
 import com.robertconstantin.request.CreateAccountRequest
 import com.robertconstantin.request.LoginRequest
+import com.robertconstantin.request.UpdateCredentialRequest
 import com.robertconstantin.responses.AuthResponse
 import com.robertconstantin.responses.ApiResponse
 import com.robertconstantin.routes.util.RoutesEndpoints.CREATE_USER_ENDPOINT
 import com.robertconstantin.routes.util.RoutesEndpoints.SIGN_IN_USER_ENDPOINT
 import com.robertconstantin.routes.util.save
+import com.robertconstantin.routes.util.userId
 import com.robertconstantin.security.hashing.HashingService
 import com.robertconstantin.security.hashing.SaltedHash
 import com.robertconstantin.security.token.TokenClaim
@@ -252,4 +255,6 @@ fun Route.getSecretInfo() {
         }
     }
 }
+
+
 

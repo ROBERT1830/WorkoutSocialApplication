@@ -7,6 +7,7 @@ import com.robertconstantin.common.Constants.PARAM_PAGE
 import com.robertconstantin.common.Constants.PARAM_PAGE_SIZE
 import com.robertconstantin.common.Constants.POST_PICTURE_PATH
 import com.robertconstantin.request.CreatePostRequest
+import com.robertconstantin.request.PostIdRequest
 import com.robertconstantin.responses.ApiResponse
 import com.robertconstantin.routes.util.RoutesEndpoints.CREATE_POST_ENDPOINT
 import com.robertconstantin.routes.util.RoutesEndpoints.GET_ALL_CURRENT_USER_POSTS
@@ -108,4 +109,65 @@ fun Route.getAllCurrentUserPosts(
 
         }
     }
+}
+
+fun Route.getPostById(postService: PostService) {
+    get("/api/post/details") {
+        val postId = call.parameters["postId"] ?: kotlin.run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@get
+        }
+        println("--------> $postId")
+        val post = postService.getPostById(call.userId, postId) ?: kotlin.run {
+            call.respond(HttpStatusCode.NotFound)
+            return@get
+        }
+        call.respond(
+            HttpStatusCode.OK,
+            post
+        )
+    }
+}
+
+fun Route.deletePostById(postService: PostService) {
+    post("/api/post/delete") {
+        val request = call.receiveOrNull<PostIdRequest>() ?: kotlin.run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+
+        if (postService.deletePostById(request.postId)) {
+            call.respond(HttpStatusCode.OK, ApiResponse<Unit>(successful = true))
+        } else call.respond(HttpStatusCode.NotFound, ApiResponse<Unit>(successful = false))
+    }
+}
+
+fun Route.createFavoriteCollection(postService: PostService) {
+    authenticate {
+        post("/api/post/favorite/insert") {
+            val request = call.receiveOrNull<PostIdRequest>() ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            if (postService.createFavoriteRelation(call.userId, request.postId)){
+                call.respond(HttpStatusCode.OK, ApiResponse<Unit>(successful = true))
+            } else call.respond(HttpStatusCode.NotFound, ApiResponse<Unit>(successful = false))
+        }
+    }
+
+}
+
+fun Route.deleteFavoriteCollection(postService: PostService) {
+    authenticate {
+        post("/api/post/favorite/delete") {
+            val request = call.receiveOrNull<PostIdRequest>() ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            if (postService.deleteFavoriteRelation(call.userId, request.postId)){
+                call.respond(HttpStatusCode.OK, ApiResponse<Unit>(successful = true))
+            } else call.respond(HttpStatusCode.NotFound, ApiResponse<Unit>(successful = false))
+        }
+    }
+
 }

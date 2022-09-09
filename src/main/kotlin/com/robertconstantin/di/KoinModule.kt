@@ -5,6 +5,8 @@ import com.google.gson.Gson
 import com.robertconstantin.common.Constants.DATABASE_NAME
 import com.robertconstantin.repository.post.PostRepository
 import com.robertconstantin.repository.post.PostRepositoryImpl
+import com.robertconstantin.repository.subscription.Subscription
+import com.robertconstantin.repository.subscription.SubscriptionImpl
 import com.robertconstantin.repository.user.UserRepository
 import com.robertconstantin.repository.user.UserRepositoryImpl
 import com.robertconstantin.security.hashing.HashingService
@@ -13,6 +15,8 @@ import com.robertconstantin.security.token.JwtTokenService
 import com.robertconstantin.security.token.TokenService
 import com.robertconstantin.service.post_service.PostService
 import com.robertconstantin.service.post_service.PostServiceImpl
+import com.robertconstantin.service.subscription_service.SubscriptionService
+import com.robertconstantin.service.subscription_service.SubscriptionServiceImpl
 import com.robertconstantin.service.user_service.UserService
 import com.robertconstantin.service.user_service.UserServiceImpl
 import org.koin.dsl.module
@@ -38,10 +42,12 @@ val koinModule = module {
     //Provide Services
     single<UserService> { UserServiceImpl(get()) }
     single<PostService> {PostServiceImpl(get())}
+    single<SubscriptionService> { SubscriptionServiceImpl(get()) }
 
     //Provide Repository
     single<UserRepository> { UserRepositoryImpl(get()) }
     single<PostRepository> { PostRepositoryImpl(get())}
+    single<Subscription> { SubscriptionImpl(get()) }
 
 
 
