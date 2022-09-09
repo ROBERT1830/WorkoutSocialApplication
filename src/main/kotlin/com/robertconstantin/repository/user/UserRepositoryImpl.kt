@@ -25,6 +25,7 @@ class UserRepositoryImpl(private val database: CoroutineDatabase): UserRepositor
         return userCollection.updateOneById(
             id = currentUserId,
             update = User(
+                id = currentUser.id,
                 profileImageUrl = currentUser.profileImageUrl,
                 name = updateCredentialRequest.name,
                 password = currentUser.password,

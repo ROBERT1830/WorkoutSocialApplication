@@ -22,10 +22,7 @@ fun Route.getUserCredentials(userService: UserService) {
             if ( response != null) {
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = ApiResponse(
-                        successful = true,
-                        data = response
-                    )
+                    response
                 )
             } else call.respond(ApiResponse<Unit>(successful = false))
         }

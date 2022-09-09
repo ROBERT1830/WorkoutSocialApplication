@@ -58,5 +58,4 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
         updateCredentialRequest: UpdateCredentialRequest
     ): Boolean = userRepository.updateUserCredentials(currentUserId, updateCredentialRequest)
 
-
 }

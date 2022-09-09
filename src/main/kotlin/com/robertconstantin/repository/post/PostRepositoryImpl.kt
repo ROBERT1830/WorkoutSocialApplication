@@ -98,6 +98,8 @@ class PostRepositoryImpl(
             }
     }
 
+
+
     override suspend fun getPostById(currentUserId: String, postId: String): PostResponse? {
         val post = postCollection.findOneById(postId) ?: return null
         val user = userCollection.findOneById(post.userId) ?: return null
@@ -118,5 +120,27 @@ class PostRepositoryImpl(
             ) != null,
 
         )
+    }
+
+    override suspend fun deletePostById(postId: String): Boolean {
+
+        println("----> potId: $postId")
+        val postToDelete = postCollection.findOneById(postId)
+        println("----> postToDelete: $postToDelete")
+        val isPostDeleted = postCollection.deleteOneById(postToDelete?.id ?: "").wasAcknowledged()
+
+        return isPostDeleted
+    }
+
+    override suspend fun createFavoriteRelation(currentUserId: String, postId: String): Boolean {
+        return favoritesCollection.insertOne(Favorites(currentUserId, postId)).wasAcknowledged()
+    }
+
+    override suspend fun deleteFavoriteRelation(currentUserId: String, postId: String): Boolean {
+        return favoritesCollection.deleteOne(
+            and(
+                Favorites::userId eq currentUserId, Favorites::postId eq postId
+            )
+        ).wasAcknowledged()
     }
 }

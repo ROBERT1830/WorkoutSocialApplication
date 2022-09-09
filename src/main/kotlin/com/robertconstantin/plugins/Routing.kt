@@ -32,6 +32,9 @@ fun Application.configureRouting(tokenConfig: TokenConfig) {
         //Post
         createPost(postService)
         getAllPosts(postService)
+        deletePostById(postService)
+        createFavoriteCollection(postService)
+        deleteFavoriteCollection(postService)
         getAllCurrentUserPosts(postService)
         //Subscription
         subscribe(subscriptionService)

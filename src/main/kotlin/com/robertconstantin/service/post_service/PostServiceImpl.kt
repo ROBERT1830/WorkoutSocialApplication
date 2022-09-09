@@ -31,6 +31,20 @@ class PostServiceImpl(
     }
 
     override suspend fun getPostById(currentUserId: String, postId: String): PostResponse? {
+        println("------->userId, $currentUserId")
         return repository.getPostById(currentUserId, postId)
+    }
+
+    override suspend fun deletePostById(postId: String): Boolean {
+        return repository.deletePostById(postId)
+    }
+
+    override suspend fun createFavoriteRelation(currentUserId: String, postId: String): Boolean {
+        println("------->userId, $currentUserId")
+        return repository.createFavoriteRelation(currentUserId, postId)
+    }
+    override suspend fun deleteFavoriteRelation(currentUserId: String, postId: String): Boolean {
+        println("------->userId, $currentUserId")
+        return repository.deleteFavoriteRelation(currentUserId, postId)
     }
 }
