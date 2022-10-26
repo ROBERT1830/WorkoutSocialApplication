@@ -3,6 +3,7 @@ package com.robertconstantin.routes
 import com.google.gson.Gson
 import com.robertconstantin.common.ApiResponseMessages.FIELDS_BLANK
 import com.robertconstantin.common.ApiResponseMessages.INVALID_CREDENTIALS
+import com.robertconstantin.common.ApiResponseMessages.SOMETHING_WENT_WRONG
 import com.robertconstantin.common.ApiResponseMessages.USER_CREDENTIALS_NO_UPDATE
 import com.robertconstantin.common.Constants.BASE_URL
 import com.robertconstantin.common.Constants.PROFILE_PICTURE_PATH
@@ -12,6 +13,7 @@ import com.robertconstantin.request.LoginRequest
 import com.robertconstantin.request.UpdateCredentialRequest
 import com.robertconstantin.responses.AuthResponse
 import com.robertconstantin.responses.ApiResponse
+import com.robertconstantin.routes.util.Constants.PROFILE_DATA
 import com.robertconstantin.routes.util.RoutesEndpoints.CREATE_USER_ENDPOINT
 import com.robertconstantin.routes.util.RoutesEndpoints.SIGN_IN_USER_ENDPOINT
 import com.robertconstantin.routes.util.save
@@ -33,7 +35,7 @@ import io.ktor.routing.*
 import org.koin.ktor.ext.inject
 import java.io.File
 
-// TODO: 26/6/22 inject with koin
+
 fun Route.createUser(
     hashingService: HashingService,
     userService: UserService
@@ -42,10 +44,6 @@ fun Route.createUser(
 
     route(CREATE_USER_ENDPOINT) {
         post {
-//            val request = call.receiveOrNull<CreateAccountRequest>() ?: kotlin.run {
-//                call.respond(HttpStatusCode.BadRequest)
-//                return@post
-//            }
 
             val multipart = call.receiveMultipart()
             var profileRequest: CreateAccountRequest? = null
@@ -54,11 +52,8 @@ fun Route.createUser(
             multipart.forEachPart { partData ->
                 when (partData) {
                     is PartData.FormItem -> {
-                        if (partData.name == "profile_data") {
-                            profileRequest = gson.fromJson(
-                                partData.value,
-                                CreateAccountRequest::class.java
-                            )
+                        if (partData.name == PROFILE_DATA) {
+                            profileRequest = gson.fromJson(partData.value, CreateAccountRequest::class.java)
                         }
                     }
                     is PartData.FileItem -> {
@@ -69,57 +64,42 @@ fun Route.createUser(
             }
 
             profileRequest?.let { request ->
-                val saltedHash = hashingService.generatedSaltedHash(request.password)
-                //Create user in database
-                userService.createUser(profileImageUrl = "${BASE_URL}profile_pictures/$profileImageFileName" ,request = request, saltedHash = saltedHash)
-            }.also { userWasCreated ->
-                if (userWasCreated == true) {
-                    call.respond(
-                        message = ApiResponse<Unit>(
-                            successful = true
+                when(userService.validateSignUpRequest(request)) {
+                    is ValidationRequest.Success -> {
+                        val saltedHash = hashingService.generatedSaltedHash(request.password)
+                        //Create user in database
+                        userService.createUser(profileImageUrl = "${BASE_URL}profile_pictures/$profileImageFileName" ,request = request, saltedHash = saltedHash).also { userWasCreated ->
+                            if (userWasCreated) {
+                                call.respond(
+                                    message = ApiResponse<Unit>(
+                                        successful = true
+                                    )
+                                )
+                            }else {
+                                File("${PROFILE_PICTURE_PATH}/$profileImageFileName").delete()
+                                call.respond(
+                                    message = ApiResponse<Unit>(
+                                        successful = false,
+                                        message = SOMETHING_WENT_WRONG
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    is ValidationRequest.FieldEmpty -> {
+                        call.respond(
+                            message = ApiResponse<Unit>(
+                                successful = false,
+                                message = FIELDS_BLANK
+                            )
                         )
-                    )
-                }else {
-                    File("${PROFILE_PICTURE_PATH}/$profileImageFileName").delete()
-                    call.respond(
-                        message = ApiResponse<Unit>(
-                            successful = false,
-                            message = FIELDS_BLANK
-                        )
-                    )
+                    }
                 }
+
             } ?: kotlin.run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-
-            //Validate empty request variables
-//            when (userService.validateSignUpRequest(request)) {
-//                is ValidationRequest.Success -> {
-//                    if (userService.checkIfUserEmailExists(request.email)) {
-//                        call.respond(
-//                            message = ApiResponse<Unit>(
-//                                message = USER_ALREADY_EXISTS,
-//                                successful = false
-//                            )
-//                        )
-//                        return@post
-//                    }
-//                    val saltedHash = hashingService.generatedSaltedHash(request.password)
-//                    //Create user in database
-//                    userService.createUser(request, saltedHash)
-//
-//
-//                }
-//                is ValidationRequest.FieldEmpty -> {
-//                    call.respond(
-//                        message = ApiResponse<Unit>(
-//                            successful = false,
-//                            message = FIELDS_BLANK
-//                        )
-//                    )
-//                }
-//            }
         }
     }
 }
